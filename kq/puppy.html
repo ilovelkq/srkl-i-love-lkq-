@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>小狗的信</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --pink: #ffd6e8;
+      --pink-light: #fff0f8;
+      --purple: #e9d5ff;
+      --accent: #e895a8;
+      --text: #5a4a5c;
+      --shadow: rgba(232, 149, 168, 0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background: linear-gradient(160deg, var(--pink-light) 0%, #f3e8ff 50%, var(--pink) 100%);
+      overflow: hidden;
+      position: relative;
+      color: var(--text);
+    }
+
+    /* 装饰背景圆 */
+    .bg-decor {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.35);
+      filter: blur(2px);
+      animation: float 8s ease-in-out infinite;
+    }
+    .bg-decor:nth-child(1) { width: 160px; height: 160px; top: 8%; left: -40px; animation-delay: 0s; }
+    .bg-decor:nth-child(2) { width: 120px; height: 120px; top: 18%; right: -20px; animation-delay: 2s; }
+    .bg-decor:nth-child(3) { width: 200px; height: 200px; bottom: 15%; left: 10%; animation-delay: 4s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-18px); }
+    }
+
+    /* 小狗精灵容器 */
+    .puppy-stage {
+      position: absolute;
+      bottom: 6vh;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(360px, 78vw);
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 5;
+    }
+
+    .puppy-wrap {
+      position: relative;
+      width: 76%;
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 40%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.45) 70%, rgba(255,255,255,0) 100%);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .puppy-wrap:hover { transform: scale(1.04); }
+    .puppy-wrap:active { transform: scale(0.96); }
+
+    .puppy-img {
+      width: 92%;
+      height: 92%;
+      object-fit: contain;
+      border-radius: 50%;
+      user-select: none;
+      -webkit-user-drag: none;
+      animation: breathe 3s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
+    /* 小狗互动状态 */
+    .puppy-wrap.excited .puppy-img {
+      animation: excitedBounce 0.5s ease-in-out 2;
+    }
+
+    @keyframes excitedBounce {
+      0%, 100% { transform: scale(1) translateY(0); }
+      25% { transform: scale(1.08) translateY(-16px); }
+      75% { transform: scale(0.96) translateY(4px); }
+    }
+
+    .puppy-wrap.turning .puppy-img {
+      animation: turnAround 1.4s ease-in-out forwards;
+    }
+
+    @keyframes turnAround {
+      0% { transform: scaleX(1); }
+      40% { transform: scaleX(-0.15) scale(0.92); }
+      60% { transform: scaleX(-0.15) scale(0.92); }
+      100% { transform: scaleX(1); }
+    }
+
+    /* 信件 */
+    .letter {
+      position: absolute;
+      width: 60px;
+      height: 42px;
+      background: linear-gradient(135deg, #fff 0%, #fff5fa 100%);
+      border-radius: 4px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .letter::before {
+      content: '';
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 18px solid transparent;
+      border-right: 18px solid transparent;
+      border-top: 14px solid #ffd6e8;
+    }
+
+    .letter::after {
+      content: '';
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 18px solid transparent;
+      border-right: 18px solid transparent;
+      border-bottom: 14px solid #fff;
+    }
+
+    .letter.show {
+      animation: bringLetter 1.6s ease-in-out forwards;
+    }
+
+    @keyframes bringLetter {
+      0% { transform: translate(-140px, -40px) rotate(-35deg); opacity: 0; }
+      30% { opacity: 1; }
+      55% { transform: translate(0, -10px) rotate(0deg); }
+      70% { transform: translate(0, -10px) rotate(0deg); }
+      100% { transform: translate(8px, 38px) rotate(6deg); opacity: 1; }
+    }
+
+    .letter.in-mouth {
+      opacity: 1;
+      transform: translate(8px, 38px) rotate(6deg);
+      animation: letterBob 2s ease-in-out infinite;
+    }
+
+    @keyframes letterBob {
+      0%, 100% { transform: translate(8px, 38px) rotate(6deg); }
+      50% { transform: translate(8px, 36px) rotate(8deg); }
+    }
+
+    /* 对话框 */
+    .dialog-bubble {
+      position: absolute;
+      top: 12vh;
+      left: 50%;
+      transform: translateX(-50%) scale(0.9);
+      width: min(320px, 86vw);
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 22px;
+      padding: 22px 20px;
+      text-align: center;
+      box-shadow: 0 18px 45px rgba(0,0,0,0.12);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s ease;
+      z-index: 10;
+    }
+
+    .dialog-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 12px 12px 0;
+      border-style: solid;
+      border-color: rgba(255,255,255,0.95) transparent transparent transparent;
+    }
+
+    .dialog-bubble.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) scale(1);
+    }
+
+    .dialog-bubble p {
+      font-size: 1.08rem;
+      line-height: 1.7;
+      margin-bottom: 18px;
+      color: var(--text);
+    }
+
+    .dialog-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .dialog-actions button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .dialog-actions button:hover { transform: translateY(-2px); }
+    .dialog-actions button:active { transform: translateY(0); }
+
+    .btn-yes {
+      background: linear-gradient(135deg, #ff7eb3, #e895a8);
+      color: #fff;
+      box-shadow: 0 6px 18px rgba(232, 149, 168, 0.35);
+    }
+
+    .btn-later {
+      background: #f3f3f3;
+      color: #777;
+    }
+
+    /* 打开信按钮 */
+    .open-letter {
+      position: absolute;
+      top: 28vh;
+      left: 50%;
+      transform: translateX(-50%) translateY(14px);
+      padding: 12px 38px;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #c084fc, #e9d5ff);
+      color: #fff;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 28px rgba(192, 132, 252, 0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      z-index: 10;
+    }
+
+    .open-letter.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* 状态提示 */
+    .hint-text {
+      position: absolute;
+      bottom: 2.5vh;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 0.8rem;
+      color: rgba(90, 74, 92, 0.55);
+      letter-spacing: 0.5px;
+    }
+
+    /* 害羞/等待中：小狗轻轻摇 */
+    .puppy-wrap.waiting .puppy-img {
+      animation: tailWag 1.2s ease-in-out infinite;
+    }
+
+    @keyframes tailWag {
+      0%, 100% { transform: rotate(-3deg); }
+      50% { transform: rotate(3deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-decor"></div>
+  <div class="bg-decor"></div>
+  <div class="bg-decor"></div>
+
+  <!-- 对话框 -->
+  <div class="dialog-bubble" id="dialog">
+    <p>是妈妈要陪我玩嘛？</p>
+    <div class="dialog-actions">
+      <button class="btn-yes" id="btn-yes">是呀是呀</button>
+      <button class="btn-later" id="btn-later">小狗乖，妈妈等会再来陪你</button>
+    </div>
+  </div>
+
+  <!-- 打开信按钮 -->
+  <button class="open-letter" id="open-letter">打开</button>
+
+  <!-- 小狗 -->
+  <div class="puppy-stage">
+    <div class="puppy-wrap waiting" id="puppy-wrap">
+      <img src="images/dog_clean.png" alt="小狗" class="puppy-img" id="puppy-img">
+      <div class="letter" id="letter"></div>
+    </div>
+  </div>
+
+  <div class="hint-text">点击小狗，和它说说话</div>
+
+  <script>
+    (function () {
+      const puppyWrap = document.getElementById('puppy-wrap');
+      const dialog = document.getElementById('dialog');
+      const btnYes = document.getElementById('btn-yes');
+      const btnLater = document.getElementById('btn-later');
+      const letter = document.getElementById('letter');
+      const openLetter = document.getElementById('open-letter');
+
+      let audioCtx = null;
+      let interactionDone = false;
+
+      function initAudio() {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      }
+
+      // 合成“汪汪”声：两个短促的衰减振荡
+      function playBark(times = 2) {
+        if (!audioCtx) initAudio();
+        const baseTime = audioCtx.currentTime;
+        for (let i = 0; i < times; i++) {
+          const start = baseTime + i * 0.22;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          // 方波更像狗叫
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(420, start);
+          osc.frequency.exponentialRampToValueAtTime(180, start + 0.12);
+          gain.gain.setValueAtTime(0.0001, start);
+          gain.gain.exponentialRampToValueAtTime(0.13, start + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.14);
+          // 低通滤波让声音不那么刺耳
+          const filter = audioCtx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(1800, start);
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(start);
+          osc.stop(start + 0.16);
+        }
+      }
+
+      // 点击小狗：弹出对话框
+      puppyWrap.addEventListener('click', () => {
+        if (interactionDone) return;
+        initAudio();
+        dialog.classList.add('show');
+        puppyWrap.classList.remove('waiting');
+      });
+
+      // “小狗乖，妈妈等会再来陪你”
+      btnLater.addEventListener('click', () => {
+        dialog.classList.remove('show');
+        puppyWrap.classList.add('waiting');
+      });
+
+      // “是呀是呀”
+      btnYes.addEventListener('click', () => {
+        dialog.classList.remove('show');
+        interactionDone = true;
+
+        // 兴奋叫两声 + 跳起来
+        puppyWrap.classList.add('excited');
+        playBark(2);
+
+        setTimeout(() => {
+          puppyWrap.classList.remove('excited');
+          // 转身叼信动画
+          puppyWrap.classList.add('turning');
+          setTimeout(() => {
+            letter.classList.add('show');
+          }, 450);
+
+          // 动画结束后：信叼在嘴里，显示“打开”按钮
+          setTimeout(() => {
+            puppyWrap.classList.remove('turning');
+            letter.classList.remove('show');
+            letter.classList.add('in-mouth');
+            setTimeout(() => {
+              openLetter.classList.add('show');
+            }, 350);
+          }, 1600);
+        }, 1100);
+      });
+
+      // 点击“打开”跳转下一页
+      openLetter.addEventListener('click', () => {
+        window.location.href = 'next.html';
+      });
+    })();
+  </script>
+</body>
+</html>
