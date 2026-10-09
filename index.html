@@ -1767,7 +1767,8 @@
         </div>
         <button class="open-letter-btn" id="puppy-open">打开</button>
         <div class="puppy-bubble" id="puppy-bubble">
-          <img src="images/dog_clean.png" alt="小狗" id="puppy-img" title="点我玩玩">
+          <img src="kq/images/dog_clean.png" alt="小狗" id="puppy-img" title="点我玩玩"
+               onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='images/dog_clean.png';}">
           <div class="puppy-letter" id="puppy-letter"></div>
         </div>
       </div>
@@ -1830,33 +1831,33 @@
 
     // 把你和女朋友的合照图片链接放进这里，没有时显示占位卡片
     const photoUrls = [
-      'photos/photo1.jpg',  // 电影院牵手
-      'photos/photo2.jpg',  // 桌上的手
-      'photos/photo3.jpg',  // 搞怪合照
-      'photos/photo4.jpg',  // 紫色灯光
-      'photos/photo5.jpg',  // 十指相扣
-      'photos/photo6.jpg',  // 江边影子
-      'photos/photo7.jpg',  // 亲吻与花束
-      'photos/photo8.jpg',  // 两颗心在靠近
-      'photos/photo9.jpg',  // 车内自拍
-      'photos/photo10.jpg', // 餐厅自拍
-      'photos/photo11.jpg', // 江边两杯奶茶
-      'photos/photo12.jpg', // 朦胧自拍
-      'photos/photo13.jpg', // 校园合照
+      'kq/photos/photo1.jpg',  // 电影院牵手
+      'kq/photos/photo2.jpg',  // 桌上的手
+      'kq/photos/photo3.jpg',  // 搞怪合照
+      'kq/photos/photo4.jpg',  // 紫色灯光
+      'kq/photos/photo5.jpg',  // 十指相扣
+      'kq/photos/photo6.jpg',  // 江边影子
+      'kq/photos/photo7.jpg',  // 亲吻与花束
+      'kq/photos/photo8.jpg',  // 两颗心在靠近
+      'kq/photos/photo9.jpg',  // 车内自拍
+      'kq/photos/photo10.jpg', // 餐厅自拍
+      'kq/photos/photo11.jpg', // 江边两杯奶茶
+      'kq/photos/photo12.jpg', // 朦胧自拍
+      'kq/photos/photo13.jpg', // 校园合照
     ];
 
     // "可爱的你"板块照片，按顺序展示
     const sillyPhotoUrls = [
-      'photos/cute1.jpg',  // 揉揉头
-      'photos/cute2.jpg',  // 背后抱
-      'photos/cute3.jpg',  // 猫耳自拍
-      'photos/cute4.jpg',  // 蹲下看手机
-      'photos/cute5.jpg',  // 车上喝饮料
-      'photos/cute6.jpg',  // 依偎自拍
-      'photos/cute7.jpg',  // 超市比爪
-      'photos/cute8.jpg',  // 大眼特写
-      'photos/cute9.jpg',  // 咖啡与手机
-      'photos/cute10.jpg', // 夜晚广场
+      'kq/photos/cute1.jpg',  // 揉揉头
+      'kq/photos/cute2.jpg',  // 背后抱
+      'kq/photos/cute3.jpg',  // 猫耳自拍
+      'kq/photos/cute4.jpg',  // 蹲下看手机
+      'kq/photos/cute5.jpg',  // 车上喝饮料
+      'kq/photos/cute6.jpg',  // 依偎自拍
+      'kq/photos/cute7.jpg',  // 超市比爪
+      'kq/photos/cute8.jpg',  // 大眼特写
+      'kq/photos/cute9.jpg',  // 咖啡与手机
+      'kq/photos/cute10.jpg', // 夜晚广场
     ];
 
     // 新增板块的文案，改成你想说的话即可
@@ -2228,6 +2229,16 @@
     });
 
     // 照片纵向滑动展示（单列）
+    // 图片路径统一带 kq/ 前缀；若取不到（例如把 kq 文件夹当网站根目录预览），
+    // 自动回退到不带前缀的老路径，两种目录结构都能正常显示。
+    function bindPhotoFallback(img) {
+      img.addEventListener('error', () => {
+        if (img.dataset.fbDone) return;
+        img.dataset.fbDone = '1';
+        img.src = img.src.replace(/(^|\/)kq\/photos\//, '$1photos/');
+      });
+    }
+
     const gallery = document.getElementById('gallery');
     if (photoUrls.length) {
       photoUrls.forEach(url => {
@@ -2237,6 +2248,7 @@
         img.src = url;
         img.alt = '合照';
         img.loading = 'lazy';
+        bindPhotoFallback(img);
         div.appendChild(img);
         gallery.appendChild(div);
       });
@@ -2256,6 +2268,7 @@
         img.src = url;
         img.alt = '可爱的你';
         img.loading = 'lazy';
+        bindPhotoFallback(img);
         div.appendChild(img);
         sillyGallery.appendChild(div);
       });
@@ -2450,10 +2463,16 @@
       if (puppyOpening) return;
       if (puppyCloseTimer) clearTimeout(puppyCloseTimer);
       puppyCloseTimer = setTimeout(() => {
-        const isOnImg = puppyImg.matches(':hover');
-        const isOnDialog = puppyDialog.matches(':hover');
-        if (!isOnImg && !isOnDialog) {
-          closePuppyDialog();
+        // 关键：回调执行时也要再判断一次。
+        // 触摸点击会先触发一次 mouseleave 把定时器排上，
+        // 紧接着 click 才把 puppyOpening 置为 true，
+        // 若这里不重新判断，刚弹出的第一条对话会被立刻收走。
+        if (!puppyOpening) {
+          const isOnImg = puppyImg.matches(':hover');
+          const isOnDialog = puppyDialog.matches(':hover');
+          if (!isOnImg && !isOnDialog) {
+            closePuppyDialog();
+          }
         }
         puppyCloseTimer = null;
       }, 250);
@@ -2576,13 +2595,15 @@
       e.stopPropagation();
       if (puppyOpening) return;
       puppyOpening = true;
+      // 清掉可能已排队的“鼠标移开就关闭”定时器，确保第一条对话稳稳停留 2 秒
+      if (puppyCloseTimer) { clearTimeout(puppyCloseTimer); puppyCloseTimer = null; }
       puppyDialog.classList.add('show');  // 对话链一开始就让对话框常驻
       initPuppyAudio();
 
       // 隐藏“打开”按钮，防止重复点击
       puppyOpen.classList.remove('show');
 
-      // 第一步：oh！妈妈，现在还不能给你哦
+      // 第一步：oh！妈妈，现在还不能给你哦（停留 2 秒）
       showPuppyStep('oh！妈妈，现在还不能给你哦', []);
 
       setTimeout(() => {
@@ -2625,7 +2646,8 @@
     let audioCtx = null;
     let musicPlaying = false;
     let musicTimer = null;
-    let gainNode = null;
+    let melodyGain = null;        // 当前生日旋律的总音量节点；换歌时整体丢弃，确保不会叠加
+    let activeOscillators = [];   // 已排期的音符，停止旋律时一并终止
     let musicMode = 'birthday'; // 'birthday' | 'special'
 
     // 《特别的人》候选音源：优先无损 flac，其次 mp3，最后回退 m4a
@@ -2680,13 +2702,19 @@
       gn.gain.linearRampToValueAtTime(0.12, when + 0.05);
       gn.gain.exponentialRampToValueAtTime(0.001, when + dur);
       osc.connect(gn);
-      gn.connect(gainNode);
+      gn.connect(melodyGain);
       osc.start(when);
       osc.stop(when + dur);
+
+      activeOscillators.push(osc);
+      osc.onended = () => {
+        const i = activeOscillators.indexOf(osc);
+        if (i !== -1) activeOscillators.splice(i, 1);
+      };
     }
 
     function scheduleMelody() {
-      if (!musicPlaying || !audioCtx) return;
+      if (!musicPlaying || !audioCtx || !melodyGain) return;
       const now = audioCtx.currentTime;
       let t = now + 0.1;
       notes.forEach(n => { playNote(n.f, n.d, t); t += n.d + 0.1; });
@@ -2694,8 +2722,28 @@
       musicTimer = setTimeout(scheduleMelody, total * 1000);
     }
 
+    // 彻底清掉正在播放/已排期的生日旋律：
+    // ① 取消下一次排期；② 断开音量节点让残留音符立即静音；③ 终止所有已排期音符。
+    // 之前只做「暂停 AudioContext」，那些已经排到未来十几秒的音符仍然留在队列里，
+    // 切回首页时会和新旋律同时发声 —— 这就是“两个生日快乐歌”的根源。
+    function clearMelody() {
+      if (musicTimer) { clearTimeout(musicTimer); musicTimer = null; }
+      if (melodyGain) {
+        try { melodyGain.gain.value = 0; } catch (e) {}
+        try { melodyGain.disconnect(); } catch (e) {}
+        melodyGain = null;
+      }
+      if (audioCtx) {
+        const t = audioCtx.currentTime;
+        activeOscillators.forEach(o => { try { o.stop(t); } catch (e) {} });
+      }
+      activeOscillators = [];
+    }
+
     function startMusic() {
       if (musicMode === 'special') {
+        // 继续播放《特别的人》：若此前只是暂停，会从暂停处接着播（不重置进度）
+        musicPlaying = true;
         const p = specialAudio.play();
         if (p && p.then) {
           p.then(() => { musicPlaying = true; })
@@ -2712,51 +2760,52 @@
              document.addEventListener('click', retry);
              document.addEventListener('touchstart', retry, { passive: true });
            });
-        } else {
-          musicPlaying = true;
         }
         return;
       }
+
+      // 生日旋律
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        gainNode = audioCtx.createGain();
-        gainNode.gain.value = 0.5;
-        gainNode.connect(audioCtx.destination);
       }
       audioCtx.resume().then(() => {
-        if (!musicPlaying) {
-          musicPlaying = true;
-          scheduleMelody();
-        }
+        if (musicMode !== 'birthday' || musicPlaying) return;
+        clearMelody();                 // 确保没有任何上一段旋律的残留
+        melodyGain = audioCtx.createGain();
+        melodyGain.gain.value = 0.5;
+        melodyGain.connect(audioCtx.destination);
+        musicPlaying = true;
+        scheduleMelody();
       });
     }
 
     function stopMusic() {
       if (musicMode === 'special') {
+        // 只暂停，保留播放位置；再次切回来时从这里继续
         specialAudio.pause();
         musicPlaying = false;
         return;
       }
       musicPlaying = false;
-      if (musicTimer) { clearTimeout(musicTimer); musicTimer = null; }
-      if (audioCtx) audioCtx.suspend();
+      clearMelody();
     }
 
     function toggleMusic() { musicPlaying ? stopMusic() : startMusic(); }
 
-    // 切换到《特别的人》（合照/可爱的你）：从头开始、循环、自动播放
+    // 切换到《特别的人》（合照/可爱的你）
+    // 只有从未播放过时才从头开始；已经播过的，暂停后再回来要接着上次的位置续播。
     function switchToSpecialMusic() {
       if (musicMode === 'special') return;
-      stopMusic();
+      stopMusic();                 // 停掉生日旋律
       musicMode = 'special';
-      specialAudio.currentTime = 0;
+      if (specialAudio.ended) specialAudio.currentTime = 0;
       startMusic();
     }
 
     // 切回生日旋律（首页）
     function switchToBirthdayMusic() {
       if (musicMode === 'birthday') return;
-      stopMusic();
+      stopMusic();                 // 暂停《特别的人》，保留进度
       musicMode = 'birthday';
       startMusic();
     }
